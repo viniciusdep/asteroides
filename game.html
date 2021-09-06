@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta charset="utf-8"/>
+	<title>Game</title>
+	</head>
+<body>
+
+	<canvas id="minha-tela" width="800" height="400" style="border: #F00 solid 1px;"> </canvas>  
+	<script>  
+		var canvas = document.getElementById('minha-tela'); 
+		var ctx = canvas.getContext('2d');
+		var fundo = new Audio("sons/spacesounds.mp3");
+		var trilha = new Audio("sons/imperialmarch.mp3");
+		var fim = new Audio("sons/gameover.mp3");
+		var explosao = new Audio("sons/explosao.mp3");
+		
+
+		//inicia os sons
+		trilha.play();
+		fundo.play();
+
+		//dimensões do canvas
+		max_x = 750;	
+		min_x = 0;
+		max_y = 350;
+		min_y = 0;
+
+		//definir o ínicio do desenho da nave
+		var x_nave = 0
+		var y_nave = 150;
+		var largura_nave = 50;
+     	var altura_nave = 50;
+		var nave = new Image();
+
+		//dimensões do asteroide
+		largura_ast = 100;
+		altura_ast = 100;
+		var variacaoAst = 0;
+		var asteroide = new Image();
+		asteroide.src = "https://www.spriters-resource.com/resources/sheet_icons/47/49877.png";
+
+		//placar
+		var ponto = 0;
+		var tAtual, tPonto, intervalo;
+		
+
+		//alatoriedade asteroide
+		x_ast = Math.floor((Math.random() * (max_x -  min_x)) + min_x);
+		y_ast = Math.floor((Math.random() * (max_y -   min_y)) + min_y);
+
+		
+		//a função gameloop é chamada aqui
+		requestAnimationFrame(gameloop);
+		
+
+		//arredondando valor do placar
+		tInicial =  Math.floor(new Date().valueOf() / 1000);
+		
+		//movimentação pelo teclado - interação do usuário
+		 window.onkeydown = pressionaTecla;
+		 function pressionaTecla(e){
+			if(e.keyCode == 37) { 
+				x_nave = x_nave - 15; //move para esquerda
+				nave.src = "imagens/esquerda.png"; 
+			}
+			if(e.keyCode == 39) {
+				x_nave = x_nave + 15; //move para direita
+				nave.src = "imagens/direita.png"; 
+			}
+			if(e.keyCode == 38) {
+				y_nave = y_nave - 15; //move para cima
+				nave.src = "imagens/cima.png"; 
+		 	}
+			if(e.keyCode == 40) {
+				y_nave = y_nave + 15; //move para baixo
+				nave.src = "imagens/baixo.png"; 
+		 	}
+		}
+		
+		function gameloop(){
+			
+			//limpa todo o Canvas (apaga a imagem  anterior)
+			ctx.clearRect(0, 0, 800, 400);
+
+			 //tempo para o placar
+			tAtual =  Math.floor(new Date().valueOf() / 1000);
+		 	marcarPonto(); 
+		 	
+			//desenhando a nave no canvas
+			desenharNave(x_nave,y_nave);
+
+			
+
+			//desenha asteroide e incia sua movimentação
+			variacaoAst++;
+			desenharAst();
+			if(variacaoAst%100==0) {
+				x_ast = Math.floor((Math.random() * (max_x -  min_x)) + min_x);
+				y_ast = Math.floor((Math.random() * (max_y -   min_y)) + min_y);
+			}
+			console.log(variacaoAst);
+			//chama novamente o ciclo da animação
+            
+			detectarColisao();
+			
+		}
+
+		//detectando colisão
+		function detectarColisao(){
+         if( ( (x_ast + largura_ast) >  x_nave && x_ast < (x_nave + 
+    largura_nave) ) && ( (y_ast + altura_ast) > y_nave && y_ast < (y_nave + altura_nave)))
+         {
+          //interrompe o game loop parando a movimentaÃ§Ã£o dos quadrados
+          clearTimeout();
+		  trilha.pause();
+		  fundo.pause();
+		  fim.play();
+		  explosao.play();
+		  alert('GAME OVER! NAVE ATINGIDA!')
+		  
+         }
+		 else {
+			//chama novamente o ciclo da animaÃ§Ã£o
+			requestAnimationFrame(gameloop);
+		 }
+     	}
+		 
+		
+		function desenharNave(x,y)
+		{
+			//desenha a nave na nova posição
+			ctx.drawImage(nave, x, y, largura_nave, altura_nave); 
+		} 
+		function desenharAst(){
+            //desenha na tela
+		 ctx.drawImage(asteroide, x_ast, y_ast, largura_ast, altura_ast);
+         
+		}
+		//construção e lógica do placar
+		function marcarPonto() {
+		ctx.strokeText('PONTOS: '+ ponto.toFixed(0),canvas.width-150,canvas.height-20);
+		ponto += 1/60; 
+		tPonto =  Math.floor(new Date().valueOf() / 1000);
+
+		console.log("Variação Tempo:" + parseInt(tPonto-tInicial));
+	}
+		
+	</script>  
+</body>
+</html>
